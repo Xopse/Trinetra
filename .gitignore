@@ -1,0 +1,55 @@
+
+# Python virtual environments
+venv/
+venv_asus/
+.venv/
+env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# Private Aadhaar documents and test data
+test/
+tests/private_data/
+uploads/
+uploaded_files/
+temp/
+tmp/
+outputs/
+results/
+*.aadhaar
+*.aadhar
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Packaging files
+build/
+dist/
+*.egg-info/
+
+# ExifTool local Windows runtime
+/exiftool.exe
+/exiftool_files/

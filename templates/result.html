@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRINETRA — Analysis Result</title>
+<style>
+  :root {
+    --maroon: #5c1010;
+    --maroon-dark: #3d0a0a;
+    --gold: #c9a227;
+    --bg: #f6f5f3;
+    --card: #ffffff;
+    --border: #e5e1db;
+    --text: #24211d;
+    --text-muted: #6b6660;
+    --green: #1e7e34;
+    --green-bg: #e6f4ea;
+    --amber: #856404;
+    --amber-bg: #fff3cd;
+    --red: #a71d2a;
+    --red-bg: #f8d7da;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+  }
+  .topbar {
+    background: var(--maroon);
+    color: white;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--maroon-dark); font-size: 18px;
+  }
+  .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+  .topbar a { color: #f0e5e5; text-decoration: none; font-size: 14px; }
+  .topbar a:hover { color: white; }
+
+  .wrap { max-width: 880px; margin: 36px auto; padding: 0 20px; }
+
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    margin-bottom: 22px;
+  }
+
+  .filename-row {
+    color: var(--text-muted); font-size: 13px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .verdict-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .verdict-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 24px;
+    font-weight: 700; font-size: 17px;
+  }
+  .verdict-GENUINE { background: var(--green-bg); color: var(--green); }
+  .verdict-SUSPICIOUS { background: var(--amber-bg); color: var(--amber); }
+  .verdict-FAKE { background: var(--red-bg); color: var(--red); }
+  .verdict-UNKNOWN { background: #eee; color: #666; }
+  .doc-type-pill {
+    font-size: 13px; padding: 6px 14px; border-radius: 20px;
+    background: #f1efe9; color: var(--text-muted);
+  }
+
+  .score-row { margin-bottom: 6px; display: flex; justify-content: space-between; align-items: baseline; }
+  .score-label { font-size: 13px; color: var(--text-muted); }
+  .score-value { font-size: 20px; font-weight: 700; }
+  .score-bar-bg { background: #eee; border-radius: 8px; height: 10px; width: 100%; overflow: hidden; margin-bottom: 4px; }
+  .score-bar-fill { height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+
+  h3.section-title {
+    font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--maroon-dark); margin: 0 0 16px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .compare-grid { display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+  .compare-col { flex: 1; min-width: 240px; }
+  .compare-label { font-weight: 600; font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .compare-photo { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+  .compare-photo-missing {
+    color: #999; font-style: italic; padding: 30px; background: #fafafa;
+    border-radius: 10px; text-align: center; font-size: 13px;
+  }
+  .field-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; }
+  .field-table td { padding: 8px 10px; border-bottom: 1px solid #f0eee8; }
+  .field-table td:first-child { color: var(--text-muted); width: 90px; font-weight: 500; }
+
+  .sig-status { padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-block; }
+  .sig-valid { background: var(--green-bg); color: var(--green); }
+  .sig-invalid { background: var(--red-bg); color: var(--red); }
+  .sig-unchecked { background: #f1efe9; color: var(--text-muted); }
+
+  .report-box {
+    white-space: pre-wrap; background: #fbfaf8; border: 1px solid var(--border);
+    padding: 22px; border-radius: 10px; line-height: 1.65; font-size: 14px;
+  }
+  .method-note { font-size: 11.5px; color: #aaa; margin-top: 8px; }
+
+  .flag-list { list-style: none; padding: 0; margin: 0; }
+  .flag-item { border-left: 4px solid #ccc; padding: 12px 16px; margin-bottom: 10px; background: #fafafa; border-radius: 0 8px 8px 0; }
+  .flag-critical { border-color: var(--red); }
+  .flag-high { border-color: #d9534f; }
+  .flag-medium { border-color: #f0ad4e; }
+  .flag-info { border-color: #5bc0de; }
+  .flag-source { font-weight: 700; font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+  .flag-severity { font-size: 11px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; font-weight: 600; }
+  .sev-critical { background: var(--red-bg); color: var(--red); }
+  .sev-high { background: #fbe4e2; color: #d9534f; }
+  .sev-medium { background: var(--amber-bg); color: var(--amber); }
+  .sev-info { background: #e3f4fa; color: #2a7f9e; }
+  .flag-desc { margin-top: 6px; font-size: 14px; color: #444; }
+
+  .back-link {
+    display: inline-block; margin-top: 8px; color: var(--maroon);
+    text-decoration: none; font-weight: 600; font-size: 14px;
+  }
+  .back-link:hover { color: var(--maroon-dark); }
+  .error-box { background: var(--red-bg); color: var(--red); padding: 20px; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div class="brand-name">TRINETRA</div>
+    </div>
+    <a href="/">&larr; Analyze another document</a>
+  </div>
+
+  <div class="wrap">
+
+    {% if error and not result %}
+      <div class="card">
+        <div class="error-box">Error analyzing document: {{ error }}</div>
+      </div>
+    {% else %}
+
+      {% set verdict = result.report.split('VERDICT: ')[1].split('\n')[0].split(' ')[0] if 'VERDICT: ' in result.report else 'UNKNOWN' %}
+
+      <div class="card">
+        <div class="filename-row">📎 {{ filename }}</div>
+        <div class="verdict-header">
+          <span class="verdict-badge verdict-{{ verdict }}">{{ verdict }}</span>
+          <span class="doc-type-pill">{{ result.document_type }} · {{ result.num_images }} image{{ 's' if result.num_images != 1 else '' }} analyzed</span>
+        </div>
+
+        <div class="score-row">
+          <span class="score-label">Authenticity Score</span>
+          <span class="score-value">{{ result.evidence_bundle.pre_llm_authenticity_score }}/100</span>
+        </div>
+        <div class="score-bar-bg">
+          {% set score = result.evidence_bundle.pre_llm_authenticity_score %}
+          <div class="score-bar-fill" style="width: {{ score }}%; background: {{ '#1e7e34' if score >= 85 else ('#c9a227' if score >= 60 else '#a71d2a') }};"></div>
+        </div>
+
+        {% if result.evidence_bundle.signature_verification_skipped %}
+          <div style="background:#fff3cd; color:#856404; padding:12px 16px; border-radius:8px; margin-top:12px; font-size:13.5px; font-weight:600;">
+            ⚠ Not cryptographically verified — no UIDAI certificate was configured, so the QR's digital signature was never checked. This result reflects only the checks that DID run, not a confirmed-genuine signature.
+          </div>
+        {% endif %}
+
+        {% if error %}
+          <p class="method-note" style="color:#a71d2a; margin-top:10px;">Note: {{ error }}</p>
+        {% endif %}
+      </div>
+
+      {% if result.qr_result and result.qr_result.decode_success %}
+      <div class="card">
+        <h3 class="section-title">Identity Verification — QR Comparison</h3>
+        <div class="compare-grid">
+          <div class="compare-col">
+            <div class="compare-label">Extracted from QR (signed by UIDAI)</div>
+            {% if extracted_photo_url %}
+              <img class="compare-photo" src="{{ extracted_photo_url }}" alt="Photo extracted from QR">
+            {% else %}
+              <div class="compare-photo-missing">No photo could be extracted from this QR</div>
+            {% endif %}
+            <table class="field-table">
+              <tr><td>Name</td><td>{{ result.qr_result.fields.name }}</td></tr>
+              <tr><td>DOB</td><td>{{ result.qr_result.fields.dob }}</td></tr>
+              <tr><td>Gender</td><td>{{ result.qr_result.fields.gender }}</td></tr>
+            </table>
+          </div>
+          <div class="compare-col">
+            <div class="compare-label">Uploaded document (first image)</div>
+            {% if front_image_url %}
+              <img class="compare-photo" src="{{ front_image_url }}" alt="Uploaded document">
+            {% endif %}
+          </div>
+        </div>
+        <p style="margin-top:14px;">
+          {% if result.qr_result.signature_valid == True %}
+            <span class="sig-status sig-valid">✓ Signature VALID — data confirmed unaltered since UIDAI signed it</span>
+            {% if result.qr_result.matched_certificate %}
+              <br><span class="method-note">Matched certificate: {{ result.qr_result.matched_certificate.split('\\')[-1].split('/')[-1] }}</span>
+            {% endif %}
+          {% elif result.qr_result.signature_valid == False %}
+            <span class="sig-status sig-invalid">✕ Signature INVALID — data does not match any configured UIDAI certificate</span>
+          {% else %}
+            <span class="sig-status sig-unchecked">Signature not checked (no certificate configured)</span>
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <h3 class="section-title">Forensic Report</h3>
+        <div class="report-box">{{ result.report }}</div>
+        <p class="method-note">Report generated via: {{ result.generation_method }}</p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Evidence Flags ({{ result.evidence_bundle.flag_count }})</h3>
+        {% if result.evidence_bundle.flags %}
+        <ul class="flag-list">
+          {% for flag in result.evidence_bundle.flags %}
+            <li class="flag-item flag-{{ flag.severity }}">
+              <span class="flag-source">{{ flag.source }}</span>
+              <span class="flag-severity sev-{{ flag.severity }}">{{ flag.severity|upper }}</span>
+              <div class="flag-desc">{{ flag.description }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+          <p style="color: var(--text-muted);">No anomalies detected across any module.</p>
+        {% endif %}
+      </div>
+
+    {% endif %}
+
+  </div>
+</body>
+</html>

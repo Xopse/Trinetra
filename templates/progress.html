@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRINETRA — Analysing…</title>
+<style>
+  :root {
+    --maroon: #5c1010;
+    --maroon-dark: #3d0a0a;
+    --gold: #c9a227;
+    --gold-soft: #fdf8ea;
+    --green: #2e7d4f;
+    --bg: #f6f5f3;
+    --card: #ffffff;
+    --border: #e5e1db;
+    --text: #24211d;
+    --text-muted: #6b6660;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+    background: var(--bg); margin: 0; color: var(--text);
+  }
+  .topbar {
+    background: var(--maroon); color: white; padding: 18px 40px;
+    display: flex; align-items: center;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--maroon-dark); font-size: 18px;
+  }
+  .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+  .brand-tagline { font-size: 12px; color: #e7d9d9; margin-top: 2px; }
+
+  .wrap { max-width: 720px; margin: 40px auto; padding: 0 20px; }
+  .card {
+    background: var(--card); border-radius: 14px; border: 1px solid var(--border);
+    padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  /* Header: scanning document + title */
+  .head { display: flex; align-items: center; gap: 22px; margin-bottom: 26px; }
+  .doc {
+    position: relative; width: 64px; height: 82px; flex-shrink: 0;
+    border-radius: 8px; border: 2px solid var(--maroon); background: #fbfaf8; overflow: hidden;
+  }
+  .doc .line { height: 5px; margin: 9px 9px 0; border-radius: 3px; background: #ddd5c8; }
+  .doc .line.short { width: 55%; }
+  .doc .scan {
+    position: absolute; left: 0; right: 0; height: 18px; top: -18px;
+    background: linear-gradient(180deg, rgba(201,162,39,0) 0%, rgba(201,162,39,.55) 85%, var(--gold) 100%);
+    animation: scan 1.6s ease-in-out infinite;
+  }
+  .done .doc .scan { display: none; }
+  @keyframes scan { 0% { top: -18px; } 100% { top: 82px; } }
+
+  h1 { font-size: 22px; margin: 0 0 6px; color: var(--maroon-dark); }
+  .sub { color: var(--text-muted); font-size: 14px; margin: 0; }
+  .sub b { color: var(--text); font-weight: 600; }
+
+  /* Overall progress bar */
+  .bar-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .bar-row .pct { font-weight: 700; color: var(--maroon); font-variant-numeric: tabular-nums; }
+  .bar {
+    height: 10px; border-radius: 10px; background: #eeebe5; overflow: hidden; margin-bottom: 26px;
+  }
+  .fill {
+    position: relative; height: 100%; width: 0%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--maroon) 0%, #8a2a1a 60%, var(--gold) 100%);
+    transition: width .45s ease-out;
+  }
+  .fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.45) 50%, transparent 100%);
+    transform: translateX(-100%); animation: shimmer 1.4s infinite;
+  }
+  .done .fill::after { animation: none; }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+  /* Stage list */
+  .stages { list-style: none; margin: 0; padding: 0; }
+  .stage {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border-radius: 10px; border: 1px solid transparent;
+    transition: background .3s, border-color .3s, opacity .3s;
+  }
+  .stage + .stage { margin-top: 4px; }
+  .stage.pending { opacity: .5; }
+  .stage.active { background: var(--gold-soft); border-color: #eadba6; }
+  .stage.skipped { opacity: .45; }
+
+  .icon {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #cfc7ba; background: white; font-size: 13px; font-weight: 700; color: white;
+  }
+  .active .icon {
+    border-color: #efe3b8; border-top-color: var(--gold);
+    animation: spin .8s linear infinite;
+  }
+  .complete .icon { background: var(--green); border-color: var(--green); animation: pop .35s ease-out; }
+  .skipped .icon { border-style: dashed; color: #b5ada2; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+  .text { flex: 1; min-width: 0; }
+  .label { font-weight: 600; font-size: 14.5px; }
+  .desc { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  .active .desc::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+  .time { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 48px; text-align: right; }
+  .complete .time { color: var(--green); }
+
+  .note { font-size: 12.5px; color: var(--text-muted); text-align: center; margin-top: 22px; line-height: 1.5; }
+  .error { color: #a71d2a; font-weight: 600; }
+  .footer { text-align: center; margin-top: 24px; font-size: 12px; color: #a7a19a; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .doc .scan, .fill::after, .active .icon, .active .desc::after { animation: none; }
+  }
+  @media (max-width: 560px) {
+    .topbar { padding: 16px 20px; }
+    .card { padding: 22px 18px; }
+    .head { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>
+        <div class="brand-name">TRINETRA</div>
+        <div class="brand-tagline">Beyond What Meets the Eye</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="head">
+        <div class="doc" aria-hidden="true">
+          <div class="line"></div><div class="line"></div><div class="line short"></div>
+          <div class="line"></div><div class="line short"></div><div class="line"></div>
+          <div class="scan"></div>
+        </div>
+        <div>
+          <h1 id="title">Analysing your document</h1>
+          <p class="sub" id="subtitle">Running every check. Usually takes a few seconds.</p>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <span id="elapsed">0.0s elapsed</span>
+        <span class="pct" id="pct">0%</span>
+      </div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar">
+        <div class="fill" id="fill"></div>
+      </div>
+
+      <ul class="stages" id="stages">
+        {% for key, label, desc in stages %}
+        <li class="stage pending" data-key="{{ key }}">
+          <div class="icon"></div>
+          <div class="text">
+            <div class="label">{{ label }}</div>
+            <div class="desc">{{ desc }}</div>
+          </div>
+          <div class="time"></div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <p class="note" id="note">Each module adds its own evidence to the final report, so you'll see exactly why the verdict was reached.</p>
+    </div>
+    <div class="footer">TRINETRA · FDD-XAI Capstone Project</div>
+  </div>
+
+<script>
+  const JOB = "{{ job_id }}";
+  const rows = Array.from(document.querySelectorAll('.stage'));
+  const keys = rows.map(r => r.dataset.key);
+  const N = keys.length;
+  const fill = document.getElementById('fill');
+  const pctEl = document.getElementById('pct');
+  const bar = document.getElementById('bar');
+  const elapsedEl = document.getElementById('elapsed');
+
+  let state = null;          // last /status payload
+  let fetchedAt = 0;         // performance.now() when it arrived
+  let shownPct = 0;
+
+  function render() {
+    if (!state) return;
+    const now = state.done ? state.elapsed : state.elapsed + (performance.now() - fetchedAt) / 1000;
+    elapsedEl.textContent = now.toFixed(1) + 's elapsed';
+
+    const cur = state.done ? N : keys.indexOf(state.current);
+    rows.forEach((row, i) => {
+      const key = keys[i];
+      const started = state.started[key];
+      const timeEl = row.querySelector('.time');
+      const icon = row.querySelector('.icon');
+      let cls;
+      if (i < cur) cls = started === undefined ? 'skipped' : 'complete';
+      else if (i === cur) cls = 'active';
+      else cls = 'pending';
+      if (!row.classList.contains(cls)) {
+        row.className = 'stage ' + cls;
+        icon.textContent = cls === 'complete' ? '✓' : cls === 'skipped' ? '–' : '';
+        if (cls === 'skipped') row.querySelector('.desc').textContent = 'Not needed for this document';
+      }
+      if (cls === 'complete') {
+        // duration = start of the next stage that actually ran (or the end)
+        let end = state.elapsed;
+        for (let j = i + 1; j < N; j++) {
+          if (state.started[keys[j]] !== undefined) { end = state.started[keys[j]]; break; }
+        }
+        timeEl.textContent = Math.max(0, end - started).toFixed(1) + 's';
+      } else if (cls === 'active') {
+        timeEl.textContent = Math.max(0, now - started).toFixed(1) + 's';
+      } else {
+        timeEl.textContent = '';
+      }
+    });
+
+    // Overall bar: finished stages, plus a slow creep inside the active one
+    // so the bar never looks frozen while a long stage is running.
+    let target;
+    if (state.done) target = 100;
+    else {
+      const inStage = Math.max(0, now - (state.started[state.current] || now));
+      const creep = 0.9 * (1 - Math.exp(-inStage / 3));
+      target = ((cur + creep) / N) * 100;
+    }
+    shownPct = Math.max(shownPct, target);
+    fill.style.width = shownPct.toFixed(1) + '%';
+    pctEl.textContent = Math.floor(shownPct) + '%';
+    bar.setAttribute('aria-valuenow', Math.floor(shownPct));
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch('/status/' + JOB, { cache: 'no-store' });
+      if (res.status === 404) { window.location = '/'; return; }
+      state = await res.json();
+      fetchedAt = performance.now();
+      if (state.done) {
+        render();
+        document.getElementById('card').classList.add('done');
+        document.getElementById('title').textContent = 'Analysis complete';
+        document.getElementById('subtitle').innerHTML = 'Finished in <b>' + state.elapsed.toFixed(1) + 's</b>. Opening the report…';
+        setTimeout(() => { window.location = '/result/' + JOB; }, 700);
+        return;
+      }
+    } catch (e) {
+      document.getElementById('note').innerHTML = '<span class="error">Lost contact with the server. Retrying…</span>';
+    }
+    setTimeout(poll, 400);
+  }
+
+  (function tick() { render(); requestAnimationFrame(tick); })();
+  poll();
+</script>
+</body>
+</html>

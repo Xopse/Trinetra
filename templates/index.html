@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRINETRA — Fake Document Detection</title>
+<style>
+  :root {
+    --maroon: #5c1010;
+    --maroon-dark: #3d0a0a;
+    --gold: #c9a227;
+    --bg: #f6f5f3;
+    --card: #ffffff;
+    --border: #e5e1db;
+    --text: #24211d;
+    --text-muted: #6b6660;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+  }
+  .topbar {
+    background: var(--maroon);
+    color: white;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--maroon-dark); font-size: 18px;
+  }
+  .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+  .brand-tagline { font-size: 12px; color: #e7d9d9; margin-top: 2px; }
+
+  .wrap { max-width: 720px; margin: 48px auto; padding: 0 20px; }
+
+  .hero { text-align: center; margin-bottom: 32px; }
+  .hero h1 { font-size: 26px; margin: 0 0 8px; color: var(--maroon-dark); }
+  .hero p { color: var(--text-muted); font-size: 15px; margin: 0; }
+
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .dropzone {
+    border: 2px dashed #cfc7ba;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #fbfaf8;
+  }
+  .dropzone.dragover { border-color: var(--gold); background: #fdf8ea; }
+  .dropzone-icon { font-size: 34px; margin-bottom: 10px; }
+  .dropzone-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .dropzone-sub { color: var(--text-muted); font-size: 13px; }
+  .dropzone input[type=file] { display: none; }
+
+  .file-list { margin-top: 16px; }
+  .file-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #f1efe9; border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 8px; font-size: 14px;
+  }
+  .file-item .name { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+  .file-item .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    background: var(--gold); color: var(--maroon-dark); flex-shrink: 0;
+  }
+  .file-item .remove {
+    cursor: pointer; color: #a71d2a; font-weight: bold; padding: 0 6px;
+  }
+
+  .accepted-types {
+    display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap;
+  }
+  .type-chip {
+    font-size: 12px; padding: 4px 12px; border-radius: 20px;
+    background: #eeece6; color: var(--text-muted);
+  }
+
+  .pdf-password-row { margin-top: 16px; }
+  .pdf-password-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .pdf-password-row input {
+    width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border);
+    font-size: 14px; font-family: inherit;
+  }
+  .pdf-password-row input:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+
+  button.submit {
+    width: 100%; background: var(--maroon); color: white; border: none;
+    padding: 15px; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 22px; transition: background 0.15s;
+  }
+  button.submit:hover { background: var(--maroon-dark); }
+  button.submit:disabled { background: #ccc; cursor: not-allowed; }
+
+  .note {
+    font-size: 12.5px; color: var(--text-muted); margin-top: 18px;
+    text-align: center; line-height: 1.5;
+  }
+  .footer { text-align: center; margin-top: 24px; font-size: 12px; color: #a7a19a; }
+  .camera-link {
+    display: block; text-align: center; margin-top: 12px; padding: 13px; border-radius: 8px;
+    border: 1px solid var(--border); color: var(--maroon); font-weight: 600; font-size: 15px;
+    text-decoration: none; background: #fbfaf8; transition: background .15s, border-color .15s;
+  }
+  .camera-link:hover { background: #fdf8ea; border-color: #eadba6; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>
+        <div class="brand-name">TRINETRA</div>
+        <div class="brand-tagline">Beyond What Meets the Eye</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Document Authenticity Verification</h1>
+      <p>Upload an Aadhaar card or e-Aadhaar PDF for explainable, multi-signal forgery detection.</p>
+    </div>
+
+    <div class="card">
+      <form action="/analyze" method="post" enctype="multipart/form-data" id="uploadForm">
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <div class="dropzone-icon">📄</div>
+          <div class="dropzone-title">Drop files here or click to browse</div>
+          <div class="dropzone-sub">Upload front, back, and/or an e-Aadhaar PDF — all at once</div>
+          <input type="file" id="fileInput" name="documents" accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp,.pdf" multiple required>
+        </label>
+
+        <div class="accepted-types">
+          <span class="type-chip">JPG / PNG</span>
+          <span class="type-chip">PDF (e-Aadhaar)</span>
+          <span class="type-chip">Multiple files</span>
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <div class="pdf-password-row" id="pdfPasswordRow" style="display:none;">
+          <label class="pdf-password-label" for="pdfPassword">e-Aadhaar PDF password (if encrypted)</label>
+          <input type="text" id="pdfPassword" name="pdf_password" placeholder="e.g. RAHU1990 — first 4 letters of name (CAPS) + birth year" autocomplete="off">
+        </div>
+
+        <button type="submit" class="submit" id="submitBtn" disabled>Analyze Document</button>
+      </form>
+      <a class="camera-link" href="/camera">📷 Or scan the card with a live camera</a>
+      <p class="note">
+        Runs entirely locally — Verhoeff/MRZ checksum validation, QR signature verification,
+        EXIF metadata analysis, and image forensics (ELA + copy-move detection).
+        Uploading multiple pages/sides improves accuracy since fields are cross-checked
+        across everything you provide.
+      </p>
+    </div>
+
+    <div class="footer">TRINETRA · FDD-XAI Capstone Project</div>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // We manage our own file collection so users can add files across
+    // multiple drag/browse actions instead of the browser silently
+    // replacing the previous selection each time.
+    let collectedFiles = [];
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      let hasPdf = false;
+      collectedFiles.forEach((file, idx) => {
+        const isPdf = file.name.toLowerCase().endsWith('.pdf');
+        if (isPdf) hasPdf = true;
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+          <div class="name">
+            <span class="badge">${isPdf ? 'PDF' : 'IMG'}</span>
+            <span>${file.name}</span>
+          </div>
+          <span class="remove" data-idx="${idx}">&times;</span>
+        `;
+        fileList.appendChild(item);
+      });
+
+      document.getElementById('pdfPasswordRow').style.display = hasPdf ? 'block' : 'none';
+
+      fileList.querySelectorAll('.remove').forEach(el => {
+        el.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.getAttribute('data-idx'));
+          collectedFiles.splice(idx, 1);
+          syncInputAndRender();
+        });
+      });
+
+      submitBtn.disabled = collectedFiles.length === 0;
+    }
+
+    function syncInputAndRender() {
+      const dt = new DataTransfer();
+      collectedFiles.forEach(f => dt.items.add(f));
+      fileInput.files = dt.files;
+      renderFileList();
+    }
+
+    function addFiles(newFiles) {
+      for (const f of newFiles) {
+        collectedFiles.push(f);
+      }
+      syncInputAndRender();
+    }
+
+    fileInput.addEventListener('click', (e) => {
+      // allow re-opening the browse dialog even if files are already selected
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      addFiles(Array.from(e.target.files).filter(f =>
+        !collectedFiles.some(existing => existing.name === f.name && existing.size === f.size)
+      ));
+    });
+
+    ['dragover'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        dropzone.classList.remove('dragover');
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      addFiles(Array.from(e.dataTransfer.files).filter(f =>
+        !collectedFiles.some(existing => existing.name === f.name && existing.size === f.size)
+      ));
+    });
+
+    // Feedback while the files upload (the live progress page opens right after)
+    document.getElementById('uploadForm').addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="btn-spinner"></span>Uploading…';
+    });
+  </script>
+  <style>
+    .btn-spinner {
+      display: inline-block; width: 14px; height: 14px; margin-right: 9px; vertical-align: -2px;
+      border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%;
+      animation: btnspin .8s linear infinite;
+    }
+    @keyframes btnspin { to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>
